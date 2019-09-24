@@ -1,0 +1,214 @@
+---
+title: "Transform Data"
+author: "Jerri Schorr"
+date: 09-24-2019
+output: github_document
+---
+
+```{r setup}
+library(tidyverse)
+#install.packages("babynames")
+library(babynames)
+babynames # this is a package of JUST data
+```
+
+# dplyr
+
+* **d** stands for data
+* **plyr** stands for plyers because we manipulate data
+
+## Review
+
+* Try to run the code and see what graph you get
+
+```{r}
+ggplot(data = babynames) + 
+  geom_line(mapping = aes(x = year, y = prop))
+```
+    + This graph isn't really helpful because it has too much info 
+    + We need to figure out how to extract specific data so that we get a clean visual
+    
+* In order to use dplyr to the fullest we need to use **tidy data**
+    + columns are variables
+        + we can select, mutate, and summarize variables
+    + rows are observations or cases
+        + we can filter, arrange, and group cases
+
+## Your Turn 1
+
+* Select
+    + first argument is the data
+    + everything after is the subset you would like to pull out
+
+Alter the code to select just the `n` column:
+
+```{r}
+select(babynames, name, prop)
+#changed code to n only
+select(babynames, n)
+```
+
+## Quiz
+
+Which of these is NOT a way to select the `name` and `n` columns together?
+
+* option 4 will **not** select name and n
+
+```{r}
+#1
+select(babynames, -c(year, sex, prop)) # this will select everythin BUT these columns
+#2
+select(babynames, name:n) # selects a range of columns
+#3
+select(babynames, starts_with("n")) # this is picking any column that starts with n
+#4
+select(babynames, ends_with("n")) # this will select columns that end with n
+```
+
+## Your Turn 2
+
+* Values go in quotes, Varibles DO NOT
+
+Use `filter`, `babynames`, and the logical operators to find:
+
+* All of the names where prop is greater than or equal to 0.08  
+* All of the children named "Sea"  
+
+```{r}
+filter(babynames, prop >= 0.07)
+filter(babynames, name == "Jerri")
+
+```
+
+* Filter gives you rows that fullfill your arguments
+    
+## Your Turn 3
+
+Use Boolean operators to return only the rows that contain:
+
+* _Boys_ named Sue  
+* Names that were used by exactly 5 or 6 children in 1880  
+* Names that are one of Acura, Lexus, or Yugo
+    + &, |, xor(a,b), !
+
+```{r}
+filter(babynames, sex == "M" & name == "Sue")
+filter(babynames, n == 5 | n == 6 & year == 1880 )
+filter(babynames, name == "Acura" | name == "Lexus" | name == "Yugo")
+# similar way to call all three names
+filter(babynames, name %in% c("Acura", "Lexus", "Yugo"))
+```
+
+## Help Me
+
+What is the smallest value of n?
+What is the largest?
+
+* arrange()
+    + first argument is data
+    + second argument is the variable column
+    + third argument is to settle ties in the data
+    + default is small to large
+    + desc() makes it go the opposite
+    + strings will be arranged alphabetically
+
+```{r}
+arrange(babynames, n) #5
+arrange(babynames, desc(n)) #99686
+arrange(babynames, n, prop) 
+```
+
+## Your Turn 4
+
+* Pipe function %>%
+    + take output from one line and add it to the next 
+    + allows us to do multiple steps in a more organized way
+
+Use `%>%` to write a sequence of functions that: 
+
+1. Filters babynames to just the girls that were born in 2017, *then...*  
+2. Selects the `name` and `n` columns, *then...*  
+3. Arranges the results so that the most popular names are near the top.
+
+```{r}
+#long way 
+boys_2015 <- filter(babynames, year == "2015", sex == "M")
+boys_2015 <- filter(boys_2015, name, n )
+boys_2015 <- arrange(boys_2015, desc(n))
+boys_2015
+
+# pipe way
+filter(babynames, year == 2015, sex == "M") %>%
+  select(name, n) %>%
+  arrange(desc(n))
+```
+
+## Your Turn 5 - Exam
+
+1. Trim `babynames` to just the rows that contain **your** `name` and **your** `sex`  
+2. Trim the result to just the columns that will appear in your graph (not strictly necessary, but useful practice)  
+3. Plot the results as a line graph with `year` on the x axis and `prop` on the y axis
+
+```{r}
+
+
+```
+
+## Your Turn 6
+
+Copmplete the code below to extract the rows where `name == "Khaleesi"`. Then use `summarise()` and `sum()` and `min()` to find:
+
+1. The total number of children named Khaleesi
+2. The first year Khaleesi appeared in the data
+
+*(Hint: Be sure to remove each `_` before running the code)*
+
+```{r}
+babynames ___ 
+  filter(_______________________) ___
+  ___________(total = ________, first = _______)
+```
+
+## Your Turn 7
+
+Use `group_by()`, `summarise()`, and `arrange()` to display the ten most popular names. Compute popularity as the *total* number of children of a single gender given a name.
+
+*(Hint: Be sure to remove each `_` before running the code)*
+
+```{r}
+babynames %>%
+  _______(name, sex) %>% 
+  _______(total = _____(n)) %>% 
+  _______(desc(_____))
+```
+
+
+## Your Turn 8
+
+Fill in the blanks to: 
+Rank each name _within its year and sex_. 
+
+*(Hint: Be sure to remove each `_` before running the code)*
+
+```{r}
+babynames %>% 
+  group_by(____, ____) %>% 
+  ______(rank = min_rank(____(prop)))
+```
+
+
+***
+
+# Take aways
+
+* Extract variables with `select()`  
+* Extract cases with `filter()`  
+* Arrange cases, with `arrange()`  
+
+* Make tables of summaries with `summarise()`  
+* Make new variables, with `mutate()`  
+* Do groupwise operations with `group_by()`
+
+* Connect operations with `%>%`  
+
+
